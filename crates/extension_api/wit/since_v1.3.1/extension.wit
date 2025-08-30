@@ -28,6 +28,13 @@ world extension {
     /// working directory.
     import download-file: func(url: string, file-path: string) -> result<_, string>;
 
+    record settings-location {
+        worktree-id: u64,
+        path: string,
+    }
+
+    import get-settings: func(path: option<settings-location>, category: string, key: option<string>) -> result<string, string>;
+
     /// Makes the file at the given path executable.
     import make-file-executable: func(filepath: string) -> result<_, string>;
 
