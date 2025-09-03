@@ -212,7 +212,10 @@ inline void fill_command(const klyx::Command &cmd, extension_command_t *ret) {
   }
 }
 
+#ifdef __cplusplus
 extern "C" {
+#endif
+
 void exports_extension_uninstall() {
   if (!EXTENSION)
     return;
@@ -345,14 +348,21 @@ bool exports_extension_language_server_additional_workspace_configuration(
   return true;
 }
 
-bool exports_extension_labels_for_completions(extension_string_t *language_server_id, extension_list_completion_t *completions, extension_list_option_code_label_t *ret, extension_string_t *err) {
-    // Not implemented in klyx
-    return false;
+bool exports_extension_labels_for_completions(
+    extension_string_t *language_server_id,
+    extension_list_completion_t *completions,
+    extension_list_option_code_label_t *ret, extension_string_t *err) {
+  // Not implemented in klyx
+  return false;
 }
 
-bool exports_extension_labels_for_symbols(extension_string_t *language_server_id, extension_list_symbol_t *symbols, extension_list_option_code_label_t *ret, extension_string_t *err) {
-    // Not implemented in klyx
-    return false;
+bool exports_extension_labels_for_symbols(
+    extension_string_t *language_server_id, extension_list_symbol_t *symbols,
+    extension_list_option_code_label_t *ret, extension_string_t *err) {
+  // Not implemented in klyx
+  return false;
 }
 
+#ifdef __cplusplus
 } // extern "C"
+#endif
