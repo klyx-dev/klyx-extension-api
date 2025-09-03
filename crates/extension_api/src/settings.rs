@@ -1,6 +1,6 @@
 //! Provides access to Klyx settings.
 
-#[path = "../wit/since_v1.3.1/settings.rs"]
+#[path = "../../../wit/since_v1.3.1/settings.rs"]
 mod types;
 
 use crate::{Result, SettingsLocation, Worktree, wit};
