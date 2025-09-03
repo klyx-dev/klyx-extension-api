@@ -31,3 +31,5 @@ This will compile the extension to WebAssembly, and package it into a `.zip` in 
 
 * The build script automatically packages the extension into a zip file named `<id>-<version>.zip` based on `extension.toml`.
 * This package can be loaded by Klyx as an extension.
+
+[Limitations](https://github.com/webassembly/wasi-sdk?tab=readme-ov-file#notable-limitations)
