@@ -19,6 +19,115 @@ typedef uint8_t klyx_extension_system_toast_duration_t;
 #define KLYX_EXTENSION_SYSTEM_TOAST_DURATION_SHORT 0
 #define KLYX_EXTENSION_SYSTEM_TOAST_DURATION_LONG 1
 
+// HTTP methods.
+typedef uint8_t klyx_extension_http_client_http_method_t;
+
+// `GET`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_GET 0
+// `HEAD`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_HEAD 1
+// `POST`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_POST 2
+// `PUT`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_PUT 3
+// `DELETE`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_DELETE 4
+// `OPTIONS`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_OPTIONS 5
+// `PATCH`
+#define KLYX_EXTENSION_HTTP_CLIENT_HTTP_METHOD_PATCH 6
+
+// The policy for dealing with redirects received from the server.
+typedef struct klyx_extension_http_client_redirect_policy_t {
+  uint8_t tag;
+  union {
+    uint32_t     follow_limit;
+  } val;
+} klyx_extension_http_client_redirect_policy_t;
+
+// Redirects from the server will not be followed.
+// 
+// This is the default behavior.
+#define KLYX_EXTENSION_HTTP_CLIENT_REDIRECT_POLICY_NO_FOLLOW 0
+// Redirects from the server will be followed up to the specified limit.
+#define KLYX_EXTENSION_HTTP_CLIENT_REDIRECT_POLICY_FOLLOW_LIMIT 1
+// All redirects from the server will be followed.
+#define KLYX_EXTENSION_HTTP_CLIENT_REDIRECT_POLICY_FOLLOW_ALL 2
+
+typedef struct {
+  extension_string_t f0;
+  extension_string_t f1;
+} extension_tuple2_string_string_t;
+
+typedef struct {
+  extension_tuple2_string_string_t *ptr;
+  size_t len;
+} extension_list_tuple2_string_string_t;
+
+typedef struct {
+  uint8_t *ptr;
+  size_t len;
+} extension_list_u8_t;
+
+typedef struct {
+  bool is_some;
+  extension_list_u8_t val;
+} extension_option_list_u8_t;
+
+// An HTTP request.
+typedef struct klyx_extension_http_client_http_request_t {
+  // The HTTP method for the request.
+  klyx_extension_http_client_http_method_t   method;
+  // The URL to which the request should be made.
+  extension_string_t   url;
+  // The headers for the request.
+  extension_list_tuple2_string_string_t   headers;
+  // The request body.
+  extension_option_list_u8_t   body;
+  // The policy to use for redirects.
+  klyx_extension_http_client_redirect_policy_t   redirect_policy;
+} klyx_extension_http_client_http_request_t;
+
+// An HTTP response.
+typedef struct klyx_extension_http_client_http_response_t {
+  // The response headers.
+  extension_list_tuple2_string_string_t   headers;
+  // The response body.
+  extension_list_u8_t   body;
+} klyx_extension_http_client_http_response_t;
+
+typedef struct klyx_extension_http_client_own_http_response_stream_t {
+  int32_t __handle;
+} klyx_extension_http_client_own_http_response_stream_t;
+
+typedef struct klyx_extension_http_client_borrow_http_response_stream_t {
+  int32_t __handle;
+} klyx_extension_http_client_borrow_http_response_stream_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    klyx_extension_http_client_http_response_t ok;
+    extension_string_t err;
+  } val;
+} klyx_extension_http_client_result_http_response_string_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    extension_option_list_u8_t ok;
+    extension_string_t err;
+  } val;
+} klyx_extension_http_client_result_option_list_u8_string_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    klyx_extension_http_client_own_http_response_stream_t ok;
+    extension_string_t err;
+  } val;
+} klyx_extension_http_client_result_own_http_response_stream_string_t;
+
 // A (half-open) range (`[start, end)`).
 typedef struct klyx_extension_common_range_t {
   // The start of the range (inclusive).
@@ -26,11 +135,6 @@ typedef struct klyx_extension_common_range_t {
   // The end of the range (exclusive).
   uint32_t   end;
 } klyx_extension_common_range_t;
-
-typedef struct {
-  extension_string_t f0;
-  extension_string_t f1;
-} extension_tuple2_string_string_t;
 
 // A list of environment variables.
 typedef struct klyx_extension_common_env_vars_t {
@@ -59,11 +163,6 @@ typedef struct {
   bool is_some;
   int32_t val;
 } extension_option_s32_t;
-
-typedef struct {
-  uint8_t *ptr;
-  size_t len;
-} extension_list_u8_t;
 
 // The output of a finished process.
 typedef struct klyx_extension_process_output_t {
@@ -374,6 +473,16 @@ typedef struct {
 // Imported Functions from `klyx:extension/system`
 extern void klyx_extension_system_show_toast(extension_string_t *message, klyx_extension_system_toast_duration_t duration);
 
+// Imported Functions from `klyx:extension/http-client`
+// Performs an HTTP request and returns the response.
+extern bool klyx_extension_http_client_fetch(klyx_extension_http_client_http_request_t *req, klyx_extension_http_client_http_response_t *ret, extension_string_t *err);
+// Retrieves the next chunk of data from the response stream.
+// 
+// Returns `Ok(None)` if the stream has ended.
+extern bool klyx_extension_http_client_method_http_response_stream_next_chunk(klyx_extension_http_client_borrow_http_response_stream_t self, extension_option_list_u8_t *ret, extension_string_t *err);
+// Performs an HTTP request and returns a response stream.
+extern bool klyx_extension_http_client_fetch_stream(klyx_extension_http_client_http_request_t *req, klyx_extension_http_client_own_http_response_stream_t *ret, extension_string_t *err);
+
 // Imported Functions from `klyx:extension/process`
 // Executes the given command as a child process, waiting for it to finish
 // and collecting all of its output.
@@ -416,7 +525,31 @@ bool exports_extension_labels_for_symbols(extension_string_t *language_server_id
 
 // Helper Functions
 
+void klyx_extension_http_client_redirect_policy_free(klyx_extension_http_client_redirect_policy_t *ptr);
+
 void extension_tuple2_string_string_free(extension_tuple2_string_string_t *ptr);
+
+void extension_list_tuple2_string_string_free(extension_list_tuple2_string_string_t *ptr);
+
+void extension_list_u8_free(extension_list_u8_t *ptr);
+
+void extension_option_list_u8_free(extension_option_list_u8_t *ptr);
+
+void klyx_extension_http_client_http_request_free(klyx_extension_http_client_http_request_t *ptr);
+
+void klyx_extension_http_client_http_response_free(klyx_extension_http_client_http_response_t *ptr);
+
+extern void klyx_extension_http_client_http_response_stream_drop_own(klyx_extension_http_client_own_http_response_stream_t handle);
+
+extern void klyx_extension_http_client_http_response_stream_drop_borrow(klyx_extension_http_client_borrow_http_response_stream_t handle);
+
+extern klyx_extension_http_client_borrow_http_response_stream_t klyx_extension_http_client_borrow_http_response_stream(klyx_extension_http_client_own_http_response_stream_t handle);
+
+void klyx_extension_http_client_result_http_response_string_free(klyx_extension_http_client_result_http_response_string_t *ptr);
+
+void klyx_extension_http_client_result_option_list_u8_string_free(klyx_extension_http_client_result_option_list_u8_string_t *ptr);
+
+void klyx_extension_http_client_result_own_http_response_stream_string_free(klyx_extension_http_client_result_own_http_response_stream_string_t *ptr);
 
 void klyx_extension_common_env_vars_free(klyx_extension_common_env_vars_t *ptr);
 
@@ -427,8 +560,6 @@ void extension_list_string_free(extension_list_string_t *ptr);
 void klyx_extension_process_command_free(klyx_extension_process_command_t *ptr);
 
 void extension_option_s32_free(extension_option_s32_t *ptr);
-
-void extension_list_u8_free(extension_list_u8_t *ptr);
 
 void klyx_extension_process_output_free(klyx_extension_process_output_t *ptr);
 

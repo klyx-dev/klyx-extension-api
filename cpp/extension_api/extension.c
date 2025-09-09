@@ -8,6 +8,17 @@
 __attribute__((__import_module__("klyx:extension/system"), __import_name__("show-toast")))
 extern void __wasm_import_klyx_extension_system_show_toast(uint8_t *, size_t, int32_t);
 
+// Imported Functions from `klyx:extension/http-client`
+
+__attribute__((__import_module__("klyx:extension/http-client"), __import_name__("fetch")))
+extern void __wasm_import_klyx_extension_http_client_fetch(int32_t, uint8_t *, size_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, int32_t, int32_t, uint8_t *);
+
+__attribute__((__import_module__("klyx:extension/http-client"), __import_name__("[method]http-response-stream.next-chunk")))
+extern void __wasm_import_klyx_extension_http_client_method_http_response_stream_next_chunk(int32_t, uint8_t *);
+
+__attribute__((__import_module__("klyx:extension/http-client"), __import_name__("fetch-stream")))
+extern void __wasm_import_klyx_extension_http_client_fetch_stream(int32_t, uint8_t *, size_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, int32_t, int32_t, uint8_t *);
+
 // Imported Functions from `klyx:extension/process`
 
 __attribute__((__import_module__("klyx:extension/process"), __import_name__("run-command")))
@@ -349,9 +360,94 @@ static uint8_t RET_AREA[(7*sizeof(void*))];
 
 // Helper Functions
 
+void klyx_extension_http_client_redirect_policy_free(klyx_extension_http_client_redirect_policy_t *ptr) {
+  switch ((int32_t) ptr->tag) {
+    case 1: {
+      break;
+    }
+  }
+}
+
 void extension_tuple2_string_string_free(extension_tuple2_string_string_t *ptr) {
   extension_string_free(&ptr->f0);
   extension_string_free(&ptr->f1);
+}
+
+void extension_list_tuple2_string_string_free(extension_list_tuple2_string_string_t *ptr) {
+  size_t list_len = ptr->len;
+  if (list_len > 0) {
+    extension_tuple2_string_string_t *list_ptr = ptr->ptr;
+    for (size_t i = 0; i < list_len; i++) {
+      extension_tuple2_string_string_free(&list_ptr[i]);
+    }
+    free(list_ptr);
+  }
+}
+
+void extension_list_u8_free(extension_list_u8_t *ptr) {
+  size_t list_len = ptr->len;
+  if (list_len > 0) {
+    uint8_t *list_ptr = ptr->ptr;
+    for (size_t i = 0; i < list_len; i++) {
+    }
+    free(list_ptr);
+  }
+}
+
+void extension_option_list_u8_free(extension_option_list_u8_t *ptr) {
+  if (ptr->is_some) {
+    extension_list_u8_free(&ptr->val);
+  }
+}
+
+void klyx_extension_http_client_http_request_free(klyx_extension_http_client_http_request_t *ptr) {
+  extension_string_free(&ptr->url);
+  extension_list_tuple2_string_string_free(&ptr->headers);
+  extension_option_list_u8_free(&ptr->body);
+  klyx_extension_http_client_redirect_policy_free(&ptr->redirect_policy);
+}
+
+void klyx_extension_http_client_http_response_free(klyx_extension_http_client_http_response_t *ptr) {
+  extension_list_tuple2_string_string_free(&ptr->headers);
+  extension_list_u8_free(&ptr->body);
+}
+
+__attribute__((__import_module__("klyx:extension/http-client"), __import_name__("[resource-drop]http-response-stream")))
+extern void __wasm_import_klyx_extension_http_client_http_response_stream_drop(int32_t handle);
+
+void klyx_extension_http_client_http_response_stream_drop_own(klyx_extension_http_client_own_http_response_stream_t handle) {
+  __wasm_import_klyx_extension_http_client_http_response_stream_drop(handle.__handle);
+}
+
+void klyx_extension_http_client_http_response_stream_drop_borrow(klyx_extension_http_client_borrow_http_response_stream_t handle) {
+  __wasm_import_klyx_extension_http_client_http_response_stream_drop(handle.__handle);
+}
+
+klyx_extension_http_client_borrow_http_response_stream_t klyx_extension_http_client_borrow_http_response_stream(klyx_extension_http_client_own_http_response_stream_t arg) {
+  return (klyx_extension_http_client_borrow_http_response_stream_t) { arg.__handle };
+}
+
+void klyx_extension_http_client_result_http_response_string_free(klyx_extension_http_client_result_http_response_string_t *ptr) {
+  if (!ptr->is_err) {
+    klyx_extension_http_client_http_response_free(&ptr->val.ok);
+  } else {
+    extension_string_free(&ptr->val.err);
+  }
+}
+
+void klyx_extension_http_client_result_option_list_u8_string_free(klyx_extension_http_client_result_option_list_u8_string_t *ptr) {
+  if (!ptr->is_err) {
+    extension_option_list_u8_free(&ptr->val.ok);
+  } else {
+    extension_string_free(&ptr->val.err);
+  }
+}
+
+void klyx_extension_http_client_result_own_http_response_stream_string_free(klyx_extension_http_client_result_own_http_response_stream_string_t *ptr) {
+  if (!ptr->is_err) {
+  } else {
+    extension_string_free(&ptr->val.err);
+  }
 }
 
 void klyx_extension_common_env_vars_free(klyx_extension_common_env_vars_t *ptr) {
@@ -388,16 +484,6 @@ void klyx_extension_process_command_free(klyx_extension_process_command_t *ptr) 
 
 void extension_option_s32_free(extension_option_s32_t *ptr) {
   if (ptr->is_some) {
-  }
-}
-
-void extension_list_u8_free(extension_list_u8_t *ptr) {
-  size_t list_len = ptr->len;
-  if (list_len > 0) {
-    uint8_t *list_ptr = ptr->ptr;
-    for (size_t i = 0; i < list_len; i++) {
-    }
-    free(list_ptr);
   }
 }
 
@@ -705,6 +791,169 @@ void extension_string_free(extension_string_t *ret) {
 
 void klyx_extension_system_show_toast(extension_string_t *message, klyx_extension_system_toast_duration_t duration) {
   __wasm_import_klyx_extension_system_show_toast((uint8_t *) (*message).ptr, (*message).len, (int32_t) duration);
+}
+
+bool klyx_extension_http_client_fetch(klyx_extension_http_client_http_request_t *req, klyx_extension_http_client_http_response_t *ret, extension_string_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
+  int32_t option;
+  uint8_t * option1;
+  size_t option2;
+  if (((*req).body).is_some) {
+    const extension_list_u8_t *payload0 = &((*req).body).val;
+    option = 1;
+    option1 = (uint8_t *) (*payload0).ptr;
+    option2 = (*payload0).len;
+  } else {
+    option = 0;
+    option1 = 0;
+    option2 = 0;
+  }
+  int32_t variant;
+  int32_t variant6;
+  switch ((int32_t) ((*req).redirect_policy).tag) {
+    case 0: {
+      variant = 0;
+      variant6 = 0;
+      break;
+    }
+    case 1: {
+      const uint32_t *payload4 = &((*req).redirect_policy).val.follow_limit;
+      variant = 1;
+      variant6 = (int32_t) (*payload4);
+      break;
+    }
+    case 2: {
+      variant = 2;
+      variant6 = 0;
+      break;
+    }
+  }
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_klyx_extension_http_client_fetch((int32_t) (*req).method, (uint8_t *) ((*req).url).ptr, ((*req).url).len, (uint8_t *) ((*req).headers).ptr, ((*req).headers).len, option, option1, option2, variant, variant6, ptr);
+  klyx_extension_http_client_result_http_response_string_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (klyx_extension_http_client_http_response_t) {
+        (extension_list_tuple2_string_string_t) (extension_list_tuple2_string_string_t) { (extension_tuple2_string_string_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) },
+        (extension_list_u8_t) (extension_list_u8_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) },
+      };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool klyx_extension_http_client_method_http_response_stream_next_chunk(klyx_extension_http_client_borrow_http_response_stream_t self, extension_option_list_u8_t *ret, extension_string_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(4*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_klyx_extension_http_client_method_http_response_stream_next_chunk((self).__handle, ptr);
+  klyx_extension_http_client_result_option_list_u8_string_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      extension_option_list_u8_t option;
+      switch ((int32_t) *((uint8_t*) (ptr + sizeof(void*)))) {
+        case 0: {
+          option.is_some = false;
+          break;
+        }
+        case 1: {
+          option.is_some = true;
+          option.val = (extension_list_u8_t) { (uint8_t*)(*((uint8_t **) (ptr + (2*sizeof(void*))))), (*((size_t*) (ptr + (3*sizeof(void*))))) };
+          break;
+        }
+      }
+
+      result.val.ok = option;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool klyx_extension_http_client_fetch_stream(klyx_extension_http_client_http_request_t *req, klyx_extension_http_client_own_http_response_stream_t *ret, extension_string_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(3*sizeof(void*))];
+  int32_t option;
+  uint8_t * option1;
+  size_t option2;
+  if (((*req).body).is_some) {
+    const extension_list_u8_t *payload0 = &((*req).body).val;
+    option = 1;
+    option1 = (uint8_t *) (*payload0).ptr;
+    option2 = (*payload0).len;
+  } else {
+    option = 0;
+    option1 = 0;
+    option2 = 0;
+  }
+  int32_t variant;
+  int32_t variant6;
+  switch ((int32_t) ((*req).redirect_policy).tag) {
+    case 0: {
+      variant = 0;
+      variant6 = 0;
+      break;
+    }
+    case 1: {
+      const uint32_t *payload4 = &((*req).redirect_policy).val.follow_limit;
+      variant = 1;
+      variant6 = (int32_t) (*payload4);
+      break;
+    }
+    case 2: {
+      variant = 2;
+      variant6 = 0;
+      break;
+    }
+  }
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_klyx_extension_http_client_fetch_stream((int32_t) (*req).method, (uint8_t *) ((*req).url).ptr, ((*req).url).len, (uint8_t *) ((*req).headers).ptr, ((*req).headers).len, option, option1, option2, variant, variant6, ptr);
+  klyx_extension_http_client_result_own_http_response_stream_string_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (klyx_extension_http_client_own_http_response_stream_t) { *((int32_t*) (ptr + sizeof(void*))) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 bool klyx_extension_process_run_command(klyx_extension_process_command_t *command, klyx_extension_process_output_t *ret, extension_string_t *err) {
