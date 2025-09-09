@@ -24,6 +24,14 @@ extern void __wasm_import_klyx_extension_http_client_fetch_stream(int32_t, uint8
 __attribute__((__import_module__("klyx:extension/process"), __import_name__("run-command")))
 extern void __wasm_import_klyx_extension_process_run_command(uint8_t *, size_t, uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
 
+// Imported Functions from `klyx:extension/github`
+
+__attribute__((__import_module__("klyx:extension/github"), __import_name__("latest-github-release")))
+extern void __wasm_import_klyx_extension_github_latest_github_release(uint8_t *, size_t, int32_t, int32_t, uint8_t *);
+
+__attribute__((__import_module__("klyx:extension/github"), __import_name__("github-release-by-tag-name")))
+extern void __wasm_import_klyx_extension_github_github_release_by_tag_name(uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
+
 // Imported Functions from `extension`
 
 __attribute__((__import_module__("$root"), __import_name__("download-file")))
@@ -496,6 +504,35 @@ void klyx_extension_process_output_free(klyx_extension_process_output_t *ptr) {
 void klyx_extension_process_result_output_string_free(klyx_extension_process_result_output_string_t *ptr) {
   if (!ptr->is_err) {
     klyx_extension_process_output_free(&ptr->val.ok);
+  } else {
+    extension_string_free(&ptr->val.err);
+  }
+}
+
+void klyx_extension_github_github_release_asset_free(klyx_extension_github_github_release_asset_t *ptr) {
+  extension_string_free(&ptr->name);
+  extension_string_free(&ptr->download_url);
+}
+
+void klyx_extension_github_list_github_release_asset_free(klyx_extension_github_list_github_release_asset_t *ptr) {
+  size_t list_len = ptr->len;
+  if (list_len > 0) {
+    klyx_extension_github_github_release_asset_t *list_ptr = ptr->ptr;
+    for (size_t i = 0; i < list_len; i++) {
+      klyx_extension_github_github_release_asset_free(&list_ptr[i]);
+    }
+    free(list_ptr);
+  }
+}
+
+void klyx_extension_github_github_release_free(klyx_extension_github_github_release_t *ptr) {
+  extension_string_free(&ptr->version);
+  klyx_extension_github_list_github_release_asset_free(&ptr->assets);
+}
+
+void klyx_extension_github_result_github_release_string_free(klyx_extension_github_result_github_release_string_t *ptr) {
+  if (!ptr->is_err) {
+    klyx_extension_github_github_release_free(&ptr->val.ok);
   } else {
     extension_string_free(&ptr->val.err);
   }
@@ -982,6 +1019,66 @@ bool klyx_extension_process_run_command(klyx_extension_process_command_t *comman
         (extension_option_s32_t) option,
         (extension_list_u8_t) (extension_list_u8_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+1*sizeof(void*))))), (*((size_t*) (ptr + (8+2*sizeof(void*))))) },
         (extension_list_u8_t) (extension_list_u8_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+3*sizeof(void*))))), (*((size_t*) (ptr + (8+4*sizeof(void*))))) },
+      };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool klyx_extension_github_latest_github_release(extension_string_t *repo, klyx_extension_github_github_release_options_t *options, klyx_extension_github_github_release_t *ret, extension_string_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_klyx_extension_github_latest_github_release((uint8_t *) (*repo).ptr, (*repo).len, (*options).require_assets, (*options).pre_release, ptr);
+  klyx_extension_github_result_github_release_string_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (klyx_extension_github_github_release_t) {
+        (extension_string_t) (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) },
+        (klyx_extension_github_list_github_release_asset_t) (klyx_extension_github_list_github_release_asset_t) { (klyx_extension_github_github_release_asset_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) },
+      };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool klyx_extension_github_github_release_by_tag_name(extension_string_t *repo, extension_string_t *tag, klyx_extension_github_github_release_t *ret, extension_string_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_klyx_extension_github_github_release_by_tag_name((uint8_t *) (*repo).ptr, (*repo).len, (uint8_t *) (*tag).ptr, (*tag).len, ptr);
+  klyx_extension_github_result_github_release_string_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (klyx_extension_github_github_release_t) {
+        (extension_string_t) (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) },
+        (klyx_extension_github_list_github_release_asset_t) (klyx_extension_github_list_github_release_asset_t) { (klyx_extension_github_github_release_asset_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) },
       };
       break;
     }

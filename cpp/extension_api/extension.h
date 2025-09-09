@@ -184,6 +184,43 @@ typedef struct {
   } val;
 } klyx_extension_process_result_output_string_t;
 
+// An asset from a GitHub release.
+typedef struct klyx_extension_github_github_release_asset_t {
+  // The name of the asset.
+  extension_string_t   name;
+  // The download URL for the asset.
+  extension_string_t   download_url;
+} klyx_extension_github_github_release_asset_t;
+
+typedef struct {
+  klyx_extension_github_github_release_asset_t *ptr;
+  size_t len;
+} klyx_extension_github_list_github_release_asset_t;
+
+// A GitHub release.
+typedef struct klyx_extension_github_github_release_t {
+  // The version of the release.
+  extension_string_t   version;
+  // The list of assets attached to the release.
+  klyx_extension_github_list_github_release_asset_t   assets;
+} klyx_extension_github_github_release_t;
+
+// The options used to filter down GitHub releases.
+typedef struct klyx_extension_github_github_release_options_t {
+  // Whether releases without assets should be included.
+  bool   require_assets;
+  // Whether pre-releases should be included.
+  bool   pre_release;
+} klyx_extension_github_github_release_options_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    klyx_extension_github_github_release_t ok;
+    extension_string_t err;
+  } val;
+} klyx_extension_github_result_github_release_string_t;
+
 // The kind of an LSP completion.
 typedef struct klyx_extension_lsp_completion_kind_t {
   uint8_t tag;
@@ -488,6 +525,16 @@ extern bool klyx_extension_http_client_fetch_stream(klyx_extension_http_client_h
 // and collecting all of its output.
 extern bool klyx_extension_process_run_command(klyx_extension_process_command_t *command, klyx_extension_process_output_t *ret, extension_string_t *err);
 
+// Imported Functions from `klyx:extension/github`
+// Returns the latest release for the given GitHub repository.
+// 
+// Takes repo as a string in the form "<owner-name>/<repo-name>", for example: "klyx-dev/klyx".
+extern bool klyx_extension_github_latest_github_release(extension_string_t *repo, klyx_extension_github_github_release_options_t *options, klyx_extension_github_github_release_t *ret, extension_string_t *err);
+// Returns the GitHub release with the specified tag name for the given GitHub repository.
+// 
+// Returns an error if a release with the given tag name does not exist.
+extern bool klyx_extension_github_github_release_by_tag_name(extension_string_t *repo, extension_string_t *tag, klyx_extension_github_github_release_t *ret, extension_string_t *err);
+
 // Imported Functions from `extension`
 // Downloads a file from the given URL and saves it to the given path within the extension's
 // working directory.
@@ -564,6 +611,14 @@ void extension_option_s32_free(extension_option_s32_t *ptr);
 void klyx_extension_process_output_free(klyx_extension_process_output_t *ptr);
 
 void klyx_extension_process_result_output_string_free(klyx_extension_process_result_output_string_t *ptr);
+
+void klyx_extension_github_github_release_asset_free(klyx_extension_github_github_release_asset_t *ptr);
+
+void klyx_extension_github_list_github_release_asset_free(klyx_extension_github_list_github_release_asset_t *ptr);
+
+void klyx_extension_github_github_release_free(klyx_extension_github_github_release_t *ptr);
+
+void klyx_extension_github_result_github_release_string_free(klyx_extension_github_result_github_release_string_t *ptr);
 
 void klyx_extension_lsp_completion_kind_free(klyx_extension_lsp_completion_kind_t *ptr);
 
