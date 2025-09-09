@@ -4,6 +4,7 @@ world extension {
     import system;
     import http-client;
     import process;
+    import github;
 
     use common.{env-vars, range};
     use lsp.{completion, symbol};
