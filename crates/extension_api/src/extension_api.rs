@@ -185,7 +185,7 @@ pub static KLYX_API_VERSION: [u8; 6] = *include_bytes!(concat!(env!("OUT_DIR"), 
 mod wit {
     wit_bindgen::generate!({
         skip: ["init-extension"],
-        path: "../../wit/since_v1.3.2",
+        path: "./wit/since_v1.3.2",
     });
 }
 
