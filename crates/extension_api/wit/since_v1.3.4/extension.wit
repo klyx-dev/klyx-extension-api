@@ -30,6 +30,8 @@ world extension {
     /// working directory.
     import download-file: func(url: string, file-path: string) -> result<_, string>;
 
+    import unzip-file: func(file-path: string, destination-path: string) -> result<_, string>;
+
     record settings-location {
         worktree-id: u64,
         path: string,

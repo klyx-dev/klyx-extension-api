@@ -20,7 +20,7 @@ pub use wit::{
         latest_github_release,
     },
     klyx::extension::system::{ToastDuration, show_toast},
-    make_file_executable,
+    make_file_executable, unzip_file,
 };
 
 // Undocumented WIT re-exports.
@@ -189,7 +189,7 @@ pub static KLYX_API_VERSION: [u8; 6] = *include_bytes!(concat!(env!("OUT_DIR"), 
 mod wit {
     wit_bindgen::generate!({
         skip: ["init-extension"],
-        path: "./wit/since_v1.3.3",
+        path: "./wit/since_v1.3.4",
     });
 }
 
