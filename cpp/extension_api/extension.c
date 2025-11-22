@@ -32,10 +32,18 @@ extern void __wasm_import_klyx_extension_github_latest_github_release(uint8_t *,
 __attribute__((__import_module__("klyx:extension/github"), __import_name__("github-release-by-tag-name")))
 extern void __wasm_import_klyx_extension_github_github_release_by_tag_name(uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
 
+// Imported Functions from `klyx:extension/platform`
+
+__attribute__((__import_module__("klyx:extension/platform"), __import_name__("current-platform")))
+extern void __wasm_import_klyx_extension_platform_current_platform(uint8_t *);
+
 // Imported Functions from `extension`
 
 __attribute__((__import_module__("$root"), __import_name__("download-file")))
-extern void __wasm_import_extension_download_file(uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
+extern void __wasm_import_extension_download_file(uint8_t *, size_t, uint8_t *, size_t, int32_t, uint8_t *);
+
+__attribute__((__import_module__("$root"), __import_name__("unzip-file")))
+extern void __wasm_import_extension_unzip_file(uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
 
 __attribute__((__import_module__("$root"), __import_name__("get-settings")))
 extern void __wasm_import_extension_get_settings(int32_t, int64_t, uint8_t *, size_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, uint8_t *);
@@ -1097,11 +1105,47 @@ bool klyx_extension_github_github_release_by_tag_name(extension_string_t *repo, 
   }
 }
 
-bool extension_download_file(extension_string_t *url, extension_string_t *file_path, extension_string_t *err) {
+void klyx_extension_platform_current_platform(klyx_extension_platform_tuple2_os_architecture_t *ret) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_klyx_extension_platform_current_platform(ptr);
+  *ret = (klyx_extension_platform_tuple2_os_architecture_t) {
+    (klyx_extension_platform_os_t) (int32_t) *((uint8_t*) (ptr + 0)),
+    (klyx_extension_platform_architecture_t) (int32_t) *((uint8_t*) (ptr + 1)),
+  };
+}
+
+bool extension_download_file(extension_string_t *url, extension_string_t *file_path, extension_downloaded_file_type_t file_type, extension_string_t *err) {
   __attribute__((__aligned__(sizeof(void*))))
   uint8_t ret_area[(3*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
-  __wasm_import_extension_download_file((uint8_t *) (*url).ptr, (*url).len, (uint8_t *) (*file_path).ptr, (*file_path).len, ptr);
+  __wasm_import_extension_download_file((uint8_t *) (*url).ptr, (*url).len, (uint8_t *) (*file_path).ptr, (*file_path).len, (int32_t) file_type, ptr);
+  extension_result_void_string_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (extension_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+  }
+  if (!result.is_err) {
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool extension_unzip_file(extension_string_t *file_path, extension_string_t *destination_path, extension_string_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(3*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_extension_unzip_file((uint8_t *) (*file_path).ptr, (*file_path).len, (uint8_t *) (*destination_path).ptr, (*destination_path).len, ptr);
   extension_result_void_string_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {

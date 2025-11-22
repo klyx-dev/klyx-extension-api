@@ -221,6 +221,35 @@ typedef struct {
   } val;
 } klyx_extension_github_result_github_release_string_t;
 
+// An operating system.
+typedef uint8_t klyx_extension_platform_os_t;
+
+// macOS.
+#define KLYX_EXTENSION_PLATFORM_OS_MAC 0
+// Linux.
+#define KLYX_EXTENSION_PLATFORM_OS_LINUX 1
+// Windows.
+#define KLYX_EXTENSION_PLATFORM_OS_WINDOWS 2
+// Android
+#define KLYX_EXTENSION_PLATFORM_OS_ANDROID 3
+// iOS
+#define KLYX_EXTENSION_PLATFORM_OS_IOS 4
+
+// A platform architecture.
+typedef uint8_t klyx_extension_platform_architecture_t;
+
+// AArch64 (e.g., Apple Silicon, Android).
+#define KLYX_EXTENSION_PLATFORM_ARCHITECTURE_AARCH64 0
+// x86.
+#define KLYX_EXTENSION_PLATFORM_ARCHITECTURE_X86 1
+// x86-64.
+#define KLYX_EXTENSION_PLATFORM_ARCHITECTURE_X8664 2
+
+typedef struct {
+  klyx_extension_platform_os_t f0;
+  klyx_extension_platform_architecture_t f1;
+} klyx_extension_platform_tuple2_os_architecture_t;
+
 // The kind of an LSP completion.
 typedef struct klyx_extension_lsp_completion_kind_t {
   uint8_t tag;
@@ -354,6 +383,18 @@ typedef klyx_extension_lsp_completion_t extension_completion_t;
 typedef klyx_extension_lsp_symbol_t extension_symbol_t;
 
 typedef klyx_extension_process_command_t extension_command_t;
+
+// The type of a downloaded file.
+typedef uint8_t extension_downloaded_file_type_t;
+
+// A gzipped file (`.gz`).
+#define EXTENSION_DOWNLOADED_FILE_TYPE_GZIP 0
+// A gzipped tar archive (`.tar.gz`).
+#define EXTENSION_DOWNLOADED_FILE_TYPE_GZIP_TAR 1
+// A ZIP file (`.zip`).
+#define EXTENSION_DOWNLOADED_FILE_TYPE_ZIP 2
+// An uncompressed file.
+#define EXTENSION_DOWNLOADED_FILE_TYPE_UNCOMPRESSED 3
 
 // The installation status for a language server.
 typedef struct extension_language_server_installation_status_t {
@@ -535,10 +576,17 @@ extern bool klyx_extension_github_latest_github_release(extension_string_t *repo
 // Returns an error if a release with the given tag name does not exist.
 extern bool klyx_extension_github_github_release_by_tag_name(extension_string_t *repo, extension_string_t *tag, klyx_extension_github_github_release_t *ret, extension_string_t *err);
 
+// Imported Functions from `klyx:extension/platform`
+// Gets the current operating system and architecture.
+extern void klyx_extension_platform_current_platform(klyx_extension_platform_tuple2_os_architecture_t *ret);
+
 // Imported Functions from `extension`
 // Downloads a file from the given URL and saves it to the given path within the extension's
 // working directory.
-extern bool extension_download_file(extension_string_t *url, extension_string_t *file_path, extension_string_t *err);
+// 
+// The file will be extracted according to the given file type.
+extern bool extension_download_file(extension_string_t *url, extension_string_t *file_path, extension_downloaded_file_type_t file_type, extension_string_t *err);
+extern bool extension_unzip_file(extension_string_t *file_path, extension_string_t *destination_path, extension_string_t *err);
 extern bool extension_get_settings(extension_settings_location_t *maybe_path, extension_string_t *category, extension_string_t *maybe_key, extension_string_t *ret, extension_string_t *err);
 // Makes the file at the given path executable.
 extern bool extension_make_file_executable(extension_string_t *filepath, extension_string_t *err);

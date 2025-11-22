@@ -13,12 +13,13 @@ pub use serde_json;
 // We explicitly enumerate the symbols we want to re-export, as there are some
 // that we may want to shadow to provide a cleaner Rust API.
 pub use wit::{
-    CodeLabel, CodeLabelSpan, CodeLabelSpanLiteral, Command, EnvVars, KeyValueStore,
-    LanguageServerInstallationStatus, Project, Range, Worktree, download_file,
+    CodeLabel, CodeLabelSpan, CodeLabelSpanLiteral, Command, DownloadedFileType, EnvVars,
+    KeyValueStore, LanguageServerInstallationStatus, Project, Range, Worktree, download_file,
     klyx::extension::github::{
         GithubRelease, GithubReleaseAsset, GithubReleaseOptions, github_release_by_tag_name,
         latest_github_release,
     },
+    klyx::extension::platform::{Architecture, Os, current_platform},
     klyx::extension::system::{ToastDuration, show_toast},
     make_file_executable, unzip_file,
 };
@@ -189,7 +190,7 @@ pub static KLYX_API_VERSION: [u8; 6] = *include_bytes!(concat!(env!("OUT_DIR"), 
 mod wit {
     wit_bindgen::generate!({
         skip: ["init-extension"],
-        path: "./wit/since_v1.3.4",
+        path: "./wit/since_v1.3.5",
     });
 }
 
