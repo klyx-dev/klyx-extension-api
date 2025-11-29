@@ -19,6 +19,10 @@ pub use wit::{
         GithubRelease, GithubReleaseAsset, GithubReleaseOptions, github_release_by_tag_name,
         latest_github_release,
     },
+    klyx::extension::nodejs::{
+        node_binary_path, npm_install_package, npm_package_installed_version,
+        npm_package_latest_version,
+    },
     klyx::extension::platform::{Architecture, Os, current_platform},
     klyx::extension::system::{ToastDuration, show_toast},
     make_file_executable, unzip_file,
@@ -190,7 +194,7 @@ pub static KLYX_API_VERSION: [u8; 6] = *include_bytes!(concat!(env!("OUT_DIR"), 
 mod wit {
     wit_bindgen::generate!({
         skip: ["init-extension"],
-        path: "./wit/since_v1.3.5",
+        path: "./wit/since_v1.3.6",
     });
 }
 
